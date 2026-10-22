@@ -3,8 +3,11 @@
 #include "verilated_vcd_c.h"
 #include "../vbuddy.cpp"
 
+#define MAX_SIM_CYC 1000000
+
 int main(int argc, char **argv, char **env){
-    int i = 0;
+    int symcyc = 0;
+    int tick;
     
     Verilated::commandArgs(argc, argv);
     Vsinegen* top = new Vsinegen;
@@ -14,26 +17,26 @@ int main(int argc, char **argv, char **env){
     tfp->open("sinegen.vcd");
 
     top->clk = 1;
-    top->en = 0;
-    top->rst = 1;
+    top->en = 1;
+    top->rst = 0;
     top->incr = 1;
 
     if(vbdOpen() != 1) return (-1);
     vbdHeader("Lab2: Sinewave Generator");
 
-    for(int i = 0; i < 300; i++){
-        for(int clk = 0; clk < 2; clk++){
+    for(symcyc = 0; symcyc < MAX_SIM_CYC; symcyc++){
+        for(tick = 0; tick < 2; tick++){
             top->eval();
-            tfp->dump(i*2 + clk);
-            top->clk = !top->clk;
+            tfp->dump(symcyc*2 + tick);
+            top->tick = !top->tick;
         }
-
-        vbdCycle(i+1);
-        vbdPlot(int(top->dout), 0, 255);
-        top->rst = (i < 2);
-        top->en = 1;
         
-        if(Verilated::gotFinish()) exit(0);
+        vbdCycle(symcyc);
+        vbdPlot(int(top->dout), 0, 255);;
+
+        
+        if(Verilated::gotFinish() || (vbdGetkey() == 'q') ) 
+            exit(0);
     }
     vbdClose();
     tfp->close();

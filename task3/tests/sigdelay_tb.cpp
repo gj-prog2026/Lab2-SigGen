@@ -1,8 +1,7 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 #include "Vsigdelay.h"
-
-#include "vbuddy.cpp"     // include vbuddy code
+#include "../vbuddy.cpp"     // include vbuddy code
 #define MAX_SIM_CYC 1000000
 #define ADDRESS_WIDTH 9
 #define RAM_SZ pow(2,ADDRESS_WIDTH)
@@ -28,8 +27,7 @@ int main(int argc, char **argv, char **env) {
   // initialize simulation input 
   top->clk = 1;
   top->rst = 0;
-  top->wr = 1;
-  top->rd = 1;
+  top->en = 1;
   top->offset = 64;
   
   // intialize variables for analogue output
@@ -48,7 +46,7 @@ int main(int argc, char **argv, char **env) {
 
     // plot RAM input/output, send sample to DAC buffer, and print cycle count
     vbdPlot(int (top->mic_signal), 0, 255);
-    vbdPlot(int (top->delayed_signal), 0, 255);
+    vbdPlot(int (top->delayed_signal), -100, 155);
     vbdCycle(simcyc);
 
     // either simulation finished, or 'q' is pressed
